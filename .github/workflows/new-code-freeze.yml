@@ -18,8 +18,8 @@ jobs:
               with:
                   script: |
                       const event = context.payload;
-                      console.log(event);
                       const release = event.release;
+
                       if (release.tag_name.endsWith('.0')) {
                           core.setOutput('run', 'true');
                       } else {
