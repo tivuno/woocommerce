@@ -1,0 +1,127 @@
+name: New Code Freeze
+on:
+    release:
+        types: [released]
+
+permissions: {}
+
+jobs:
+    verify-release:
+        name: 'Verify if the release is a major version release, that ends with .0'
+        runs-on: ubuntu-20.04
+        outputs:
+            run: ${{ steps.verify.outputs.run }}
+        steps:
+            - name: Verify release
+              id: verify
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const event = context.payload;
+                      console.log(event);
+                      const release = event.release;
+                      if (release.tag_name.endsWith('.0')) {
+                          core.setOutput('run', 'true');
+                      } else {
+                          core.setOutput('run', 'false');
+                      }
+                    
+    prep-for-code-freeze:
+        name: 'Prepare for code freeze - generate next release branch and milestone'
+        if: needs.verify-release.outputs.run == 'true'
+        needs: verify-release
+        runs-on: ubuntu-20.04
+        outputs:
+            nextReleaseBranch: ${{ steps.extract-version.outputs.nextReleaseBranch }}
+            nextMajorMilestone: ${{ steps.extract-version.outputs.nextMajorMilestone }}
+        steps:
+            - name: Extract version from release tag
+              id: extract-version
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const event = context.payload;
+                      const currentTag = event.release.tag_name;
+                      const [major, minor, patch] = currentTag.split('.').map(Number);
+
+                      let nextMajor = major;
+                      let nextMinor = minor + 1;
+                      if (nextMinor > 9) {
+                          nextMajor += 1;
+                          nextMinor = 0;
+                      }
+
+                      const nextReleaseBranch = `release/${nextMajor}.${nextMinor}.0`;
+                      const nextMajorMilestone = `${nextMajor}.${nextMinor}.0`;
+                      core.setOutput('nextReleaseBranch', nextReleaseBranch);
+                      core.setOutput('nextMajorMilestone', nextMajorMilestone);
+                      console.log(`Next release branch: ${nextReleaseBranch}`);
+                      console.log(`Next milestone: ${nextMajorMilestone}`);
+    
+    create-code-freeze-branch-and-milestone:
+        name: 'Create the code freeze branch and milestone for next release'
+        needs: prep-for-code-freeze
+        runs-on: ubuntu-20.04
+        permissions:
+          contents: write
+        steps:
+            - name: Fetch all the branches
+              uses: actions/checkout@v3
+
+            - name: Create code freeze branch out of trunk
+              run: |
+                  git checkout trunk
+                  git checkout -b $RELEASE_BRANCH
+              env:
+                RELEASE_BRANCH: ${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}
+
+            - name: Push the new branch to the remote repository
+              run: git push origin $RELEASE_BRANCH
+              env:
+                RELEASE_BRANCH: ${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}
+
+            - name: Create milestone in Github repository
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      await octokit.request('POST /repos/{process.env.OWNER}/{process.env.REPO}/milestones', {
+                          owner: process.env.OWNER,
+                          repo: process.env.REPO,
+                          title: process.env.MILESTONE
+                      });
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                OWNER: ${{ github.repository_owner }}
+                REPO: ${{ github.repository }}
+                MILESTONE: ${{ needs.prep-for-code-freeze.outputs.nextMajorMilestone }}
+
+    notify-slack:
+        name: 'Notify Slack channel about the new code freeze'
+        needs: 
+            - prep-for-code-freeze
+            - create-code-freeze-branch-and-milestone
+        runs-on: ubuntu-20.04
+        steps:
+            - name: Notify Slack on success
+              if: ${{ success() }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-text: |
+                      :arrow_right: New code freeze completed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`
+                  slack-optional-unfurl_links: false
+                  slack-optional-unfurl_media: false
+              env:
+                NEXT_RELEASE_BRANCH: ${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}
+
+            - name: Notify Slack on failure
+              if: ${{ failure() }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-text: |
+                      :warning-8c: New code freeze failed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`
+              env:
+                NEXT_RELEASE_BRANCH: ${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}
