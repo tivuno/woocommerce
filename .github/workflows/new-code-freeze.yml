@@ -25,7 +25,32 @@ jobs:
                       } else {
                           core.setOutput('run', 'false');
                       }
-                    
+
+    verify-if-any-pr-is-left-open:
+        name: 'Verify if any PR is left open by author:app/github-actions'
+        needs: verify-release
+        runs-on: ubuntu-20.04
+        steps:
+            - name: Verify if any PR is left open by author:app/github-actions
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+                      const prs = await github.rest.pulls.list({ owner, repo, state: 'open', author: 'app/github-actions' });
+                      if (prs.data.length > 0) {
+                          core.setFailed(`Found ${prs.data.length} open PRs from github-actions bot. Please close them before proceeding.`);
+                      }
+
+            - name: Notify Slack on failure
+              if: ${{ failure() }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-text: |
+                      :ice_cube: Code Freeze workflow failed.
+                      :warning-8c: There are PRs left open by `app/github-actions` bot. Please close them and re-run the workflow.
+    
     prep-for-code-freeze:
         name: 'Prepare for code freeze - generate next release branch and milestone'
         if: needs.verify-release.outputs.run == 'true'
@@ -104,7 +129,7 @@ jobs:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
                   slack-text: |
-                      :arrow_right: Code Freeze :ice_cube: completed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`. You can raise a code freeze exception if you need something to be included in this release.
+                      :ice_cube: Code Freeze completed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`. You can raise a code freeze exception if you need something to be included in this release.
                   slack-optional-unfurl_links: false
                   slack-optional-unfurl_media: false
 
