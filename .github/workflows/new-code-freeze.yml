@@ -51,7 +51,7 @@ jobs:
                           nextMinor = 0;
                       }
 
-                      const nextReleaseBranch = `release/${nextMajor}.${nextMinor}.0`;
+                      const nextReleaseBranch = `release/${nextMajor}.${nextMinor}`;
                       const nextMajorMilestone = `${nextMajor}.${nextMinor}.0`;
                       core.setOutput('nextReleaseBranch', nextReleaseBranch);
                       core.setOutput('nextMajorMilestone', nextMajorMilestone);
@@ -63,10 +63,13 @@ jobs:
         needs: prep-for-code-freeze
         runs-on: ubuntu-20.04
         permissions:
+          issues: write
           contents: write
         steps:
             - name: Fetch all the branches
               uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
 
             - name: Create code freeze branch out of trunk
               run: |
@@ -84,24 +87,16 @@ jobs:
               uses: actions/github-script@v6
               with:
                   script: |
-                      await octokit.request('POST /repos/{process.env.OWNER}/{process.env.REPO}/milestones', {
-                          owner: process.env.OWNER,
-                          repo: process.env.REPO,
+                      const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+                      await github.rest.issues.createMilestone({
+                          owner: owner,
+                          repo: repo,
                           title: process.env.MILESTONE
                       });
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                OWNER: ${{ github.repository_owner }}
-                REPO: ${{ github.repository }}
                 MILESTONE: ${{ needs.prep-for-code-freeze.outputs.nextMajorMilestone }}
 
-    notify-slack:
-        name: 'Notify Slack channel about the new code freeze'
-        needs: 
-            - prep-for-code-freeze
-            - create-code-freeze-branch-and-milestone
-        runs-on: ubuntu-20.04
-        steps:
             - name: Notify Slack on success
               if: ${{ success() }}
               uses: archive/github-actions-slack@v2.0.0
@@ -109,11 +104,9 @@ jobs:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
                   slack-text: |
-                      :arrow_right: New code freeze completed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`
+                      :arrow_right: Code freeze completed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`. You can raise a code freeze exception if you need something to be included in this release.
                   slack-optional-unfurl_links: false
                   slack-optional-unfurl_media: false
-              env:
-                NEXT_RELEASE_BRANCH: ${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}
 
             - name: Notify Slack on failure
               if: ${{ failure() }}
@@ -122,6 +115,4 @@ jobs:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
                   slack-text: |
-                      :warning-8c: New code freeze failed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`
-              env:
-                NEXT_RELEASE_BRANCH: ${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}
+                      :warning-8c: Code freeze failed for `${{ needs.prep-for-code-freeze.outputs.nextReleaseBranch }}`. Please check the logs for more details. Workflow run: `${{ github.workflow_run.html_url }}`
