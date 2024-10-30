@@ -20,12 +20,14 @@ initRemoteLogging();
  */
 import './stylesheets/_index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
 import './xstate.js';
 import { deriveWpAdminBackgroundColours } from './utils/derive-wp-admin-background-colours';
 import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
+import { registerSettingsEmailPreviewFill } from './settings-email/settings-email-preview-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from './launch-your-store';
 import {
@@ -115,6 +117,10 @@ if ( appRoot ) {
 
 	if ( window.wcAdminFeatures && window.wcAdminFeatures.blueprint === true ) {
 		registerBlueprintSlotfill();
+	}
+
+	if ( isFeatureEnabled( 'email_improvements' ) ) {
+		registerSettingsEmailPreviewFill();
 	}
 }
 
