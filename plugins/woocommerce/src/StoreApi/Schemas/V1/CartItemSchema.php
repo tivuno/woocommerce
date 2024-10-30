@@ -138,7 +138,7 @@ class CartItemSchema extends ItemSchema {
 			return $product_images;
 		}
 
-		// Return the filtered guarded images.
+		// Return the filtered images.
 		return $valid_images;
 	}
 
