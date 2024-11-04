@@ -13,16 +13,20 @@ import { Link } from '@woocommerce/components';
 import { IntroOptInEvent } from '../events';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
+import { CoreProfilerStateMachineContext } from '..';
 
 export const IntroOptIn = ( {
 	sendEvent,
 	navigationProgress,
+	context,
 }: {
 	sendEvent: ( event: IntroOptInEvent ) => void;
 	navigationProgress: number;
+	context: Pick< CoreProfilerStateMachineContext, 'optInDataSharing' >;
 } ) => {
-	const [ iOptInDataSharing, setIsOptInDataSharing ] =
-		useState< boolean >( true );
+	const [ iOptInDataSharing, setIsOptInDataSharing ] = useState< boolean >(
+		context.optInDataSharing
+	);
 
 	return (
 		<div

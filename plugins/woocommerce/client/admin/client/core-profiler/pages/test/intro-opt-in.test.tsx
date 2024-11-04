@@ -28,7 +28,6 @@ describe( 'IntroOptIn', () => {
 	} );
 
 	it( 'should render intro-opt-in page', () => {
-		// @ts-ignore
 		render( <IntroOptIn { ...props } /> );
 		expect( screen.getByText( /Welcome to Woo!/i ) ).toBeInTheDocument();
 		expect(
@@ -41,27 +40,24 @@ describe( 'IntroOptIn', () => {
 	} );
 
 	it( 'should checkbox be checked when optInDataSharing is true', () => {
-		render(
-			// @ts-ignore
-			<IntroOptIn { ...props } />
-		);
+		render( <IntroOptIn { ...props } /> );
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 	} );
 
+	it( 'should checkbox be not checked when optInDataSharing is false', () => {
+		const newProps = { ...props, context: { optInDataSharing: false } };
+		render( <IntroOptIn { ...newProps } /> );
+		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
+	} );
+
 	it( 'should toggle checkbox when checkbox is clicked', () => {
-		render(
-			// @ts-ignore
-			<IntroOptIn { ...props } />
-		);
+		render( <IntroOptIn { ...props } /> );
 		screen.getByRole( 'checkbox' ).click();
 		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 	} );
 
 	it( 'should call sendEvent with INTRO_COMPLETED event when button is clicked', () => {
-		render(
-			// @ts-ignore
-			<IntroOptIn { ...props } />
-		);
+		render( <IntroOptIn { ...props } /> );
 		screen
 			.getByRole( 'button', {
 				name: /Set up my store/i,
@@ -74,10 +70,7 @@ describe( 'IntroOptIn', () => {
 	} );
 
 	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: true when skip button is clicked and the checkbox is checked', () => {
-		render(
-			// @ts-ignore
-			<IntroOptIn { ...props } />
-		);
+		render( <IntroOptIn { ...props } /> );
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 		screen
 			.getByRole( 'button', {
@@ -91,10 +84,7 @@ describe( 'IntroOptIn', () => {
 	} );
 
 	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: false when skip button is clicked and the checkbox is unchecked', () => {
-		render(
-			// @ts-ignore
-			<IntroOptIn { ...props } />
-		);
+		render( <IntroOptIn { ...props } /> );
 		screen.getByRole( 'checkbox' ).click();
 		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 		screen
