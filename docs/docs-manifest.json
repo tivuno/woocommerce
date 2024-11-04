@@ -975,7 +975,7 @@
           "post_title": "HPOS CLI Tools",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/cli-tools.md",
-          "hash": "63e5edd55720c963de6700854515ea51946ff734b716ab61793955308b72af91",
+          "hash": "b9a313ba52cd08284e7a23be32c28bcb93be8f9389b0e5fcc041506ff0d2bd46",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/cli-tools.md",
           "id": "cdd9d9ad5777d978ba953e3478fbb61cab8fdf59"
         }
@@ -1823,5 +1823,5 @@
       "categories": []
     }
   ],
-  "hash": "b493fa620b4f693f8165bd4cdcd474badf1659f4ae65e71a012bdde28351e8eb"
+  "hash": "7d0537180f536df493bb63a5c57dfe71aece626584ac5d32512341a930ed5f20"
 }
