@@ -440,6 +440,7 @@ final class BlockTypesController {
 			'OrderConfirmation\AdditionalInformation',
 			'OrderConfirmation\AdditionalFieldsWrapper',
 			'OrderConfirmation\AdditionalFields',
+			'OrderConfirmation\CreateAccount',
 		);
 
 		$block_types = array_merge(
@@ -465,7 +466,6 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterClearButton';
 			$block_types[] = 'ProductFilterCheckboxList';
 			$block_types[] = 'ProductFilterChips';
-			$block_types[] = 'OrderConfirmation\CreateAccount';
 		}
 
 		/**
