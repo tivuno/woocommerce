@@ -7,7 +7,11 @@ import '../style.scss';
 import { WithSetupWizardLayout } from './WithSetupWizardLayout';
 
 export const Basic = () => (
-	<IntroOptIn sendEvent={ () => {} } navigationProgress={ 20 } />
+	<IntroOptIn
+		sendEvent={ () => {} }
+		navigationProgress={ 20 }
+		context={ { optInDataSharing: true } }
+	/>
 );
 
 export default {
