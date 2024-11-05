@@ -135,7 +135,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get term order.
-		$menu_order = get_term_meta( $item->term_id, 'order_' . $this->taxonomy, true );
+		$menu_order = get_term_meta( $item->term_id, 'order', true );
 
 		$data = array(
 			'id'          => (int) $item->term_id,
