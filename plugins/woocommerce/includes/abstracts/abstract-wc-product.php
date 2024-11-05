@@ -2011,6 +2011,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Gets the image caption for the product image.
+	 *
+	 * @param int   $image_id The ID of the image.
+	 * @param array $attr     Image attributes.
+	 * @return array Modified image attributes with caption.
+	 */
+	protected function get_image_caption_attributes( $image_id, $attr = array() ) {
+		if ( $image_id ) {
+			$image_caption = wp_get_attachment_caption( $image_id );
+			if ( $image_caption ) {
+				$attr['data-caption'] = $image_caption;
+			}
+		}
+		return $attr;
+	}
+
+	/**
 	 * Returns the main product image.
 	 *
 	 * @param  string $size (default: 'woocommerce_thumbnail').
@@ -2021,10 +2038,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		$image = '';
 		if ( $this->get_image_id() ) {
+			$attr = $this->get_image_caption_attributes( $this->get_image_id(), $attr );
 			$image = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 			if ( $parent_product ) {
+				$attr = $this->get_image_caption_attributes( $parent_product->get_image_id(), $attr );
 				$image = $parent_product->get_image( $size, $attr, $placeholder );
 			}
 		}
