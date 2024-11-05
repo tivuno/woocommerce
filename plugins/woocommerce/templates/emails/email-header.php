@@ -38,10 +38,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<td align="center" valign="top">
 									<div id="template_header_image">
 										<?php
+										$header_alignment = get_option( 'woocommerce_email_header_alignment' );
+										$header_alignment_style = $header_alignment ? 'text-align: ' . $header_alignment . ';' : '';
+
 										$img = get_option( 'woocommerce_email_header_image' );
 
 										if ( $img ) {
-											echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" /></p>';
+											echo '<p style="margin-top:0;' . esc_attr($header_alignment_style) . '"><img src="' . esc_url( $img ) . '" alt="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '" /></p>';
 										}
 										?>
 									</div>
@@ -52,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 												<table border="0" cellpadding="0" cellspacing="0" width="100%" id="template_header">
 													<tr>
 														<td id="header_wrapper">
-															<h1><?php echo esc_html( $email_heading ); ?></h1>
+															<h1 <?php echo $header_alignment_style ? 'style="' . esc_attr( $header_alignment_style ) . '"' : '' ?>><?php echo esc_html( $email_heading ); ?></h1>
 														</td>
 													</tr>
 												</table>
