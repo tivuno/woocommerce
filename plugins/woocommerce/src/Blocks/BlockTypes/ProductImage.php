@@ -168,7 +168,6 @@ class ProductImage extends AbstractBlock {
 		return $product->get_image(
 			$image_size,
 			array(
-				'alt'         => $product->get_title(),
 				'data-testid' => 'product-image',
 				'style'       => $image_style,
 			)
