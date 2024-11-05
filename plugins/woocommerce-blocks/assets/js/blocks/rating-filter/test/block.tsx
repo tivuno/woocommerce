@@ -5,13 +5,13 @@ import React from '@wordpress/element';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';
+import type { WCStoreV1ProductsCollectionProps } from '@woocommerce/blocks/product-collection/types';
 
 /**
  * Internal dependencies
  */
 import RatingFilterBlock from '../block';
 import { Attributes } from '../types';
-import { WCStoreV1ProductsCollectionProps } from '@woocommerce/blocks/product-collection/types';
 
 jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	__esModule: true,
@@ -34,17 +34,16 @@ const acceptErrorWithDuplicatedKeys = () => {
 	expect( console ).toHaveErrored();
 };
 
-const stubCollectionData = () =>
-	( {
-		price_range: null,
-		attribute_counts: null,
-		rating_counts: [
-			{ rating: 2, count: 5 },
-			{ rating: 4, count: 24 },
-			{ rating: 5, count: 1 },
-		],
-		stock_status_counts: null,
-	} as WCStoreV1ProductsCollectionProps );
+const stubCollectionData = (): WCStoreV1ProductsCollectionProps => ( {
+	price_range: null,
+	attribute_counts: null,
+	rating_counts: [
+		{ rating: 2, count: 5 },
+		{ rating: 4, count: 24 },
+		{ rating: 5, count: 1 },
+	],
+	stock_status_counts: null,
+} );
 
 type DisplayStyle = 'list' | 'dropdown';
 type SelectType = 'single' | 'multiple';
